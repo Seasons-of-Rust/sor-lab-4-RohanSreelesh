@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{cmp::Ordering, fmt};
 
 use crate::{card::Card, FightResult};
 
@@ -22,11 +22,38 @@ impl Shop {
         self.cards.iter().map(|card| card.health).sum()
     }
 
-    /// Simulate a fight against another store. Returns a FightResult::Win if
+    /// Simulate a fight against another store. Returns a FightResult:first_shop_wins:Win if
     /// this store wins, FightResult::Loss if this store loses, and a
     /// FightResult::Tie if both stores win the same number of battles.
     pub fn fight_store(&self, other: &Shop) -> FightResult {
-        todo!()
+        let mut first_shop_wins = 0;
+        let mut second_shop_wins = 0;
+        for card_from_shop_one in &self.cards {
+            for card_from_shop_two in &other.cards {
+                let current_result = card_from_shop_one.fight(card_from_shop_two);
+                match current_result {
+                    FightResult::Win => first_shop_wins += 1,
+
+                    FightResult::Loss => second_shop_wins += 1,
+                    _ => (),
+                }
+            }
+        }
+
+        // match first_shop_wins > second_shop_wins{
+        //     true=>FightResult::Win,
+        //     false=> match first_shop_wins == second_shop_wins {
+        //         true=> FightResult::Tie,
+        //         false=> FightResult::Loss,
+        //     }
+        // }
+
+        //trying with cmp instead of nested match
+        match first_shop_wins.cmp(&second_shop_wins) {
+            Ordering::Greater => FightResult::Win,
+            Ordering::Less => FightResult::Loss,
+            Ordering::Equal => FightResult::Tie,
+        }
     }
 }
 
